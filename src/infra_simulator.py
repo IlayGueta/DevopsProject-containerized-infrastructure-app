@@ -1,5 +1,7 @@
-import subprocess
 import logging
+import shutil
+import subprocess
+from pathlib import Path
 
 from constants import LOGGER_NAME
 
@@ -53,13 +55,40 @@ class InfrastructureProvisioner:
         self.finish()
 
     def run_install_script(self):
-        """Execute the Bash script used to install the required service."""
+        """Run the Bash installation script when a shell is available."""
 
-        logger.info(f"Running installation script for Machine - {self.machine.name}...")
+        script_path = (
+            Path(__file__).resolve().parent.parent
+            / "scripts"
+            / "install_nginx.sh"
+        )
+
+        shell_path = shutil.which("sh")
+
+        if shell_path is None:
+            logger.warning(
+                "The 'sh' command is unavailable. "
+                "Skipping the Bash script on this operating system."
+            )
+            return
+
+        logger.info(
+        f"Running installation script for Machine - {self.machine.name}..."
+    )
+
         try:
-            # Execute the Bash script and raise an error if it fails
-            subprocess.run(["sh", "scripts/install_nginx.sh"], check=True)
+            result = subprocess.run(
+            [shell_path, str(script_path)],
+            check=True,
+            capture_output=True,
+            text=True
+        )
+
+            logger.info(result.stdout.strip())
             logger.info("Installation script completed successfully")
-        except subprocess.CalledProcessError as e:
-            # Record the failure without crashing the entire application
-            logger.warning(f"Script failed with return code {e.returncode}, output: {e.output}")
+
+        except subprocess.CalledProcessError as error:
+            logger.warning(
+            "Installation script failed with return code "
+            f"{error.returncode}: {error.stderr}"
+        )

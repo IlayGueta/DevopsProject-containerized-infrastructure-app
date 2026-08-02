@@ -63,34 +63,65 @@ class InfraAutomation:
                 logger.error(f"Machine {name} already exists")
                 raise VMNameError("Machine name already exists")
 
-    def get_user_input(self):
-        """Collect, validate, save, and provision machines entered by the user."""
+    def create_machine(self, name, os_name, cpu, ram):
+        """Validate, save, and provision a single machine."""
 
-        created_machines = []
+        machine = Machine(
+            name=name,
+            os=os_name,
+            cpu=cpu,
+            ram=ram
+        )
 
-        while True:
-            name = input("Enter machine name (or 'done' to finish): ").strip().lower()
-            if name == "done":
-                break
+        self.validate_duplicate_machine_name(machine.name)
 
-            self.validate_duplicate_machine_name(name)
+        machine_data = machine.to_dict()
 
-            os_name = input(f"Enter OS {OS_OPTIONS}: ").strip().lower()
-            cpu = input(f"Enter CPU (e.g., 2vCPU): Available resources {AVAL_CPUS} vCPUs : ").strip().lower()
-            ram = input(f"Enter RAM (e.g., 4GB): Available resources in GB {AVAL_RAM} : ").strip().lower()
+        provisioner = InfrastructureProvisioner(machine)
+        provisioner.provision()
 
-            machine = Machine(name=name, os=os_name, cpu=cpu, ram=ram)
-            machine_data = machine.to_dict()
+        self.write_to_config_file(machine_data)
+        machine.log_creation()
 
-            created_machines.append(machine_data)
-            self.write_to_config_file(machine_data)
+        return machine_data
 
-            machine.log_creation()
+def get_user_input(self):
+    """Collect, validate, save, and provision machines entered by the user."""
 
-            provisioner = InfrastructureProvisioner(machine)
-            provisioner.provision()
+    created_machines = []
 
-        return created_machines
+    while True:
+        name = input(
+            "Enter machine name (or 'done' to finish): "
+        ).strip().lower()
+
+        if name == "done":
+            break
+
+        os_name = input(
+            f"Enter OS {OS_OPTIONS}: "
+        ).strip().lower()
+
+        cpu = input(
+            f"Enter CPU (e.g., 2vCPU): "
+            f"Available resources {AVAL_CPUS} vCPUs : "
+        ).strip().lower()
+
+        ram = input(
+            f"Enter RAM (e.g., 4GB): "
+            f"Available resources in GB {AVAL_RAM} : "
+        ).strip().lower()
+
+        machine_data = self.create_machine(
+            name=name,
+            os_name=os_name,
+            cpu=cpu,
+            ram=ram
+        )
+
+        created_machines.append(machine_data)
+
+    return created_machines
 
     def run(self):
         """Start the infrastructure automation workflow."""
