@@ -1,397 +1,399 @@
-# DevOps Infrastructure Automation — User Guide
+# Containerized Infrastructure Provisioning API
 
-![Python](https://img.shields.io/badge/Python-3.8+-blue?logo=python)
-![Pydantic](https://img.shields.io/badge/Pydantic-2.0+-green)
-![Status](https://img.shields.io/badge/Status-Active-success)
+A containerized Python REST API that simulates infrastructure machine provisioning.
 
-> ⚠️ **Recommended environment:** Linux, WSL, or Git Bash on Windows. The provisioning process executes a Bash (`.sh`) script.
+The application is built with **Flask**, validates machine data with **Pydantic**, stores machine records in a JSON file, and runs inside a **Docker container**.
 
 ---
 
-## 📖 Overview
+## Features
 
-This project is a command-line infrastructure automation tool written in Python. It accepts virtual machine specifications from the user, validates them with Pydantic, saves them in a JSON configuration file, simulates the provisioning process, executes a Bash installation script, and records activity in a log file.
-
-The current provisioning process is simulated. Future versions can integrate Terraform and AWS to create real infrastructure resources.
-
----
-
-## ✨ Features
-
-- **Automated VM Provisioning** — Define and provision virtual machines through a CLI
-- **Pydantic Validation** — Validate all machine specifications automatically
-- **Configuration Management** — Store VM configurations persistently in JSON
-- **Unique Identifiers** — Generate a UUID for every machine
-- **Duplicate Protection** — Prevent machines from using an existing name
-- **Custom Exceptions** — Provide clear, structured validation errors
-- **Bash Automation** — Execute a service installation script with Python
-- **Logging System** — Record machine creation and provisioning activity
-- **Modular Design** — Separate models, validation, provisioning, constants, and exceptions
+- Runs as a persistent web service
+- Listens on port `5000`
+- Returns JSON responses
+- Provides a health-check endpoint
+- Displays all provisioned machines
+- Creates new machines through an HTTP `POST` request
+- Validates machine name, operating system, CPU, and RAM
+- Prevents duplicate machine names
+- Simulates infrastructure provisioning
+- Can be built and executed as a Docker image
 
 ---
 
-## 🛠️ Technologies
+## Technologies
 
-- **Python 3.8+** — Core programming language
-- **Pydantic 2.0+** — Data modelling and validation
-- **UUID** — Unique machine identifiers
-- **JSON** — Persistent configuration storage
-- **Logging** — Operation and error tracking
-- **Bash** — Service installation automation
-- **Git** — Version control
-
-### Future Enhancements
-
-- Docker containerization
-- Terraform integration
-- AWS deployment
-- Web API with FastAPI
-- Database support with SQLite or PostgreSQL
+- Python 3.12
+- Flask
+- Pydantic
+- Docker
+- Git
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
-infrastracture-provisioning/
+.
+├── app.py
+├── Dockerfile
+├── .dockerignore
+├── requirements.txt
+├── README.md
 ├── configs/
 │   └── instances.json
 ├── logs/
-│   └── provisioning.log
 ├── scripts/
 │   └── install_nginx.sh
-├── src/
-│   ├── automation.py
-│   ├── constants.py
-│   ├── exceptions.py
-│   ├── infra_simulator.py
-│   └── machine.py
-├── README.md
-└── requirements.txt
+└── src/
+    ├── automation.py
+    ├── constants.py
+    ├── exceptions.py
+    ├── infra_simulator.py
+    └── machine.py
 ```
+
+### Main Files
+
+- `app.py` — Flask application and REST API endpoints
+- `src/automation.py` — machine creation, validation flow, storage, and provisioning logic
+- `src/machine.py` — Pydantic model and machine validation
+- `src/infra_simulator.py` — infrastructure provisioning simulation
+- `configs/instances.json` — stores created machine records
+- `scripts/install_nginx.sh` — installation simulation script
+- `Dockerfile` — instructions for building the Docker image
+- `.dockerignore` — excludes unnecessary files from the Docker build context
 
 ---
 
-## 🧱 Architecture
+## API Endpoints
 
-- **`automation.py`** — Application entry point, user input, JSON reading and writing, and workflow management
-- **`machine.py`** — Pydantic `Machine` model and VM specification validation
-- **`infra_simulator.py`** — Simulates infrastructure provisioning and runs the Bash script
-- **`constants.py`** — Stores allowed resources, file paths, and shared constant values
-- **`exceptions.py`** — Defines the project’s custom exceptions
-- **`install_nginx.sh`** — Bash script used to simulate the Nginx installation process
+### Application Information
 
----
-
-## ✅ Prerequisites
-
-Before installing the project, make sure the following tools are available:
-
-- Python 3.8 or newer
-- Git
-- Bash through Linux, WSL, or Git Bash
-- `pip`
-
----
-
-## 🚀 Installation
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/IlayGueta/infrastracture-provisioning.git
-cd infrastracture-provisioning
+```http
+GET /
 ```
 
-### 2. Create a virtual environment
-
-```bash
-python -m venv venv
-```
-
-If your system uses `python3`, run:
-
-```bash
-python3 -m venv venv
-```
-
-### 3. Activate the virtual environment
-
-#### Linux or WSL
-
-```bash
-source venv/bin/activate
-```
-
-#### Windows with Git Bash
-
-```bash
-source venv/Scripts/activate
-```
-
-#### Windows Command Prompt
-
-```cmd
-venv\Scripts\activate
-```
-
-#### Windows PowerShell
-
-```powershell
-venv\Scripts\Activate.ps1
-```
-
-### 4. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 5. Give the Bash script execution permission
-
-Run this command in Linux, WSL, or Git Bash:
-
-```bash
-chmod +x scripts/install_nginx.sh
-```
-
----
-
-## ▶️ Run the Application
-
-Run the application from the project’s root directory.
-
-### Linux or WSL
-
-```bash
-python3 src/automation.py
-```
-
-### Windows with Git Bash
-
-```bash
-python src/automation.py
-```
-
-Both commands launch the same application. The command depends on how Python is installed on the operating system.
-
----
-
-## 💻 How to Use
-
-The application prompts you to define virtual machines one at a time.
-
-### 1. Machine Name
-
-- Maximum of 10 characters
-- Must not be empty
-- Must be unique
-- Enter `done` to finish and exit
-
-### 2. Operating System
-
-Choose one of the following values:
-
-```text
-ubuntu, centos
-```
-
-### 3. CPU
-
-Choose one of the following values:
-
-```text
-1vcpu, 2vcpu, 4vcpu, 8vcpu, 16vcpu
-```
-
-### 4. RAM
-
-Choose one of the following values:
-
-```text
-2gb, 4gb, 8gb, 16gb, 32gb, 64gb
-```
-
----
-
-## 📋 Example Session
-
-```text
-Welcome to Infra Automation!
-
-Enter machine name (or 'done' to finish): web
-Enter OS ['ubuntu', 'centos']: ubuntu
-Enter CPU (e.g., 2vCPU): Available resources [1, 2, 4, 8, 16] vCPUs : 4vcpu
-Enter RAM (e.g., 4GB): Available resources in GB [2, 4, 8, 16, 32, 64] : 8gb
-
-Enter machine name (or 'done' to finish): done
-
-Created machines: [{'id': '7db4308f-...', 'name': 'web', 'os': 'ubuntu', 'cpu': '4vcpu', 'ram': '8gb'}]
-```
-
----
-
-## ⚙️ How It Works
-
-1. The application collects the machine name, operating system, CPU, and RAM from the user.
-2. Pydantic validates the values through the `Machine` model.
-3. The application checks that the machine name does not already exist.
-4. A UUID is generated automatically for the machine.
-5. The machine configuration is appended to `configs/instances.json`.
-6. `InfrastructureProvisioner` simulates the provisioning steps.
-7. Python uses `subprocess` to execute `scripts/install_nginx.sh`.
-8. Provisioning activity and errors are written to `logs/provisioning.log`.
-
----
-
-## ❌ Failure Examples
-
-### Name too long
-
-```text
-Enter machine name (or 'done' to finish): verylongname
-
-VMNameError: VM name must be 10 characters or less
-```
-
-### Empty name
-
-```text
-Enter machine name (or 'done' to finish):
-
-VMNameError: VM name cannot be empty
-```
-
-### Duplicate machine name
-
-```text
-Enter machine name (or 'done' to finish): web
-
-VMNameError: Machine name already exists
-```
-
-### Invalid operating system
-
-```text
-Enter OS ['ubuntu', 'centos']: windows
-
-VMOSError: OS must be one of: ubuntu, centos
-```
-
-### Wrong CPU format
-
-```text
-Enter CPU (e.g., 2vCPU): Available resources [1, 2, 4, 8, 16] vCPUs : 4 cores
-
-VMResourceError: CPU format must be like '4vcpu'
-```
-
-### Invalid CPU value
-
-```text
-Enter CPU (e.g., 2vCPU): Available resources [1, 2, 4, 8, 16] vCPUs : 3vcpu
-
-VMResourceError: CPU must be one of: [1, 2, 4, 8, 16] vCPUs
-```
-
-### Wrong RAM format
-
-```text
-Enter RAM (e.g., 4GB): Available resources in GB [2, 4, 8, 16, 32, 64] : 8
-
-VMResourceError: RAM format must be like '8gb'
-```
-
-### Invalid RAM value
-
-```text
-Enter RAM (e.g., 4GB): Available resources in GB [2, 4, 8, 16, 32, 64] : 10gb
-
-VMResourceError: RAM must be one of: [2, 4, 8, 16, 32, 64] GB
-```
-
----
-
-## 📁 Output
-
-### Configuration File
-
-Created machines are stored in `configs/instances.json`:
+Example response:
 
 ```json
 {
-    "machines": [
-        {
-            "id": "7db4308f-4978-46d3-90fc-49bd5b4702f1",
-            "name": "web",
-            "os": "ubuntu",
-            "cpu": "4vcpu",
-            "ram": "8gb"
-        }
-    ]
+  "application": "Infrastructure Provisioning API",
+  "message": "The containerized infrastructure application is running!",
+  "endpoints": {
+    "health": "GET /health",
+    "get_machines": "GET /machines",
+    "create_machine": "POST /machines"
+  }
 }
 ```
 
-New machines are appended to the `machines` list so existing records remain available.
+### Health Check
 
-### Log File
+```http
+GET /health
+```
 
-Provisioning operations are recorded automatically in:
+Example response:
+
+```json
+{
+  "status": "healthy"
+}
+```
+
+### Get All Machines
+
+```http
+GET /machines
+```
+
+Example response:
+
+```json
+{
+  "machines": [
+    {
+      "name": "web01",
+      "os": "ubuntu",
+      "cpu": "2vcpu",
+      "ram": "4gb"
+    }
+  ]
+}
+```
+
+### Create a Machine
+
+```http
+POST /machines
+```
+
+Request body:
+
+```json
+{
+  "name": "web01",
+  "os": "ubuntu",
+  "cpu": "2vcpu",
+  "ram": "4gb"
+}
+```
+
+Successful response:
+
+```json
+{
+  "message": "Machine created successfully",
+  "machine": {
+    "name": "web01",
+    "os": "ubuntu",
+    "cpu": "2vcpu",
+    "ram": "4gb"
+  }
+}
+```
+
+Possible HTTP status codes:
+
+- `201 Created` — machine created successfully
+- `400 Bad Request` — missing or invalid data
+- `409 Conflict` — machine name already exists
+- `500 Internal Server Error` — unexpected application error
+
+---
+
+## Allowed Machine Values
+
+### Operating Systems
 
 ```text
-logs/provisioning.log
+ubuntu
+centos
+```
+
+### CPU
+
+Use the format:
+
+```text
+2vcpu
+```
+
+Supported values depend on the validation rules defined in the project.
+
+### RAM
+
+Use the format:
+
+```text
+4gb
+```
+
+Supported values depend on the validation rules defined in the project.
+
+---
+
+## Run Locally Without Docker
+
+Install the dependencies:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+Run the application:
+
+```bash
+python app.py
+```
+
+On Windows, the Python launcher can also be used:
+
+```powershell
+py app.py
+```
+
+Open the application:
+
+```text
+http://localhost:5000
 ```
 
 ---
 
-## 🔧 Troubleshooting
+## Build the Docker Image
 
-### `python3: command not found`
-
-Try the Windows-style Python command:
+From the project root directory, run:
 
 ```bash
-python src/automation.py
+docker build -t ilay-infrastructure-api .
 ```
 
-### `python: command not found`
-
-Try the Linux-style Python command:
+Verify that the image was created:
 
 ```bash
-python3 src/automation.py
+docker images
 ```
-
-### Bash is not available on Windows
-
-Install Git Bash or run the project through WSL. Make sure the command is executed from the project’s root directory.
-
-### Permission denied when running the installation script
-
-```bash
-chmod +x scripts/install_nginx.sh
-```
-
-### `ModuleNotFoundError: No module named 'pydantic'`
-
-Activate the virtual environment and install the dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-### Machine name already exists
-
-Use a different machine name or review the existing records in `configs/instances.json`.
 
 ---
 
-## 📝 Development Notes
+## Run the Docker Container
 
-- Run the program from the repository’s root directory so relative file paths work correctly.
-- Do not delete the `configs` or `logs` directories.
-- The project currently simulates VM provisioning and does not create real cloud resources.
-- The Bash script requires an environment that supports Bash commands.
+Run the container in detached mode:
+
+```bash
+docker run -d \
+  --name ilay-app \
+  --rm \
+  -p 5000:5000 \
+  ilay-infrastructure-api
+```
+
+PowerShell single-line version:
+
+```powershell
+docker run -d --name ilay-app --rm -p 5000:5000 ilay-infrastructure-api
+```
+
+Open:
+
+```text
+http://localhost:5000
+```
+
+---
+
+## Test the API
+
+### Browser
+
+```text
+http://localhost:5000
+http://localhost:5000/health
+http://localhost:5000/machines
+```
+
+### PowerShell — Create a Machine
+
+```powershell
+$body = @{
+    name = "web01"
+    os   = "ubuntu"
+    cpu  = "2vcpu"
+    ram  = "4gb"
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+    -Uri "http://127.0.0.1:5000/machines" `
+    -Method Post `
+    -ContentType "application/json" `
+    -Body $body
+```
+
+### curl
+
+```bash
+curl -X POST http://localhost:5000/machines \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "web01",
+    "os": "ubuntu",
+    "cpu": "2vcpu",
+    "ram": "4gb"
+  }'
+```
+
+---
+
+## Container Management
+
+Show running containers:
+
+```bash
+docker ps
+```
+
+View application logs:
+
+```bash
+docker logs ilay-app
+```
+
+Follow logs continuously:
+
+```bash
+docker logs -f ilay-app
+```
+
+Stop the container:
+
+```bash
+docker stop ilay-app
+```
+
+Because the container is started with `--rm`, it is removed automatically after it stops. The Docker image remains available locally.
+
+---
+
+## Data Persistence
+
+Machine records are stored in:
+
+```text
+configs/instances.json
+```
+
+By default, changes made inside the running container are removed when the container is deleted.
+
+For persistent storage, mount the configuration directory as a bind mount:
+
+### PowerShell
+
+```powershell
+docker run -d `
+  --name ilay-app `
+  --rm `
+  -p 5000:5000 `
+  -v "${PWD}/configs:/home/app/configs" `
+  ilay-infrastructure-api
+```
+
+### Linux / Git Bash
+
+```bash
+docker run -d \
+  --name ilay-app \
+  --rm \
+  -p 5000:5000 \
+  -v "$(pwd)/configs:/home/app/configs" \
+  ilay-infrastructure-api
+```
+
+---
+
+## Docker Hub
+
+After tagging and pushing the image to Docker Hub, another user can run it without building the project locally.
+
+Example format:
+
+```bash
+docker pull DOCKERHUB_USERNAME/ilay-infrastructure-api:1.0
+docker run -d -p 5000:5000 DOCKERHUB_USERNAME/ilay-infrastructure-api:1.0
+```
+
+Replace `DOCKERHUB_USERNAME` with the correct Docker Hub username.
+
+---
+
+## Notes
+
+- The application binds to `0.0.0.0` so it can be accessed outside the container.
+- `EXPOSE 5000` documents the container port.
+- Port publishing is performed at runtime with `-p 5000:5000`.
+- Flask's built-in server is suitable for development and project demonstrations.
+- For a production deployment, use a production WSGI server such as Gunicorn.
 
 ---
 
@@ -400,4 +402,4 @@ Use a different machine name or review the existing records in `configs/instance
 **Ilay Gueta**
 
 - GitHub: [@IlayGueta](https://github.com/IlayGueta)
-- Project: [Infrastructure Provisioning](https://github.com/IlayGueta/infrastracture-provisioning)
+- Project: [DevopsProject-containerized-infrastructure-app](https://github.com/IlayGueta/DevopsProject-containerized-infrastructure-app)
