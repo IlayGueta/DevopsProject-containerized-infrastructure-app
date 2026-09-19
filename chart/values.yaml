@@ -1,0 +1,38 @@
+replicaCount: 1
+
+image:
+  repository: ilaygueta/ilay-infrastructure-api
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+app:
+  port: 5000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  host: infrastructure.local
+  path: /
+  pathType: Prefix
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http

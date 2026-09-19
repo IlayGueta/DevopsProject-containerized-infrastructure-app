@@ -1,0 +1,39 @@
+Infrastructure API deployed successfully.
+
+Release:
+  {{ .Release.Name }}
+
+Check the deployed resources:
+  kubectl get pods,svc,ingress
+
+{{- if .Values.ingress.enabled }}
+
+Ingress host:
+  {{ .Values.ingress.host }}
+
+If the ingress controller is not directly reachable from your machine,
+you can use port-forward:
+
+  kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80
+
+Then test the application with:
+
+  curl -H "Host: {{ .Values.ingress.host }}" http://localhost:8080/
+
+Health check:
+
+  curl -H "Host: {{ .Values.ingress.host }}" http://localhost:8080/health
+
+{{- else }}
+
+Ingress is disabled.
+
+You can access the application using:
+
+  kubectl port-forward service/{{ include "infrastructure-api.fullname" . }} 8080:{{ .Values.service.port }}
+
+Then open:
+
+  http://localhost:8080
+
+{{- end }}

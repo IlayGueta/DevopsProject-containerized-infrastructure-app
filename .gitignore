@@ -3,4 +3,6 @@ venv/
 .idea/
 __pycache__/
 *.pyc
+.env
+aws-values.yaml
 logs/*.log
