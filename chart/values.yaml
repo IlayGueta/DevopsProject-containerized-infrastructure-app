@@ -26,13 +26,3 @@ resources:
   limits:
     cpu: 500m
     memory: 256Mi
-
-livenessProbe:
-  httpGet:
-    path: /health
-    port: http
-
-readinessProbe:
-  httpGet:
-    path: /health
-    port: http
