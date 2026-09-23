@@ -25,9 +25,9 @@ pipeline {
                         passwordVariable: 'PASSWORD'
                     )
                 ]) {
-                    echo "Pushing ${env.APP_NAME}:${env.BUILD_NUMBER}"
+                    echo "Deploying with username ${env.USERNAME}"
 
-                    sh "echo '${env.PASSWORD}' | docker login -u ${env.USERNAME} --password-stdin"
+                    sh 'echo "$PASSWORD" | docker login -u "$USERNAME" --password-stdin'
                     sh "docker tag ${env.APP_NAME}:${env.BUILD_NUMBER} ${env.USERNAME}/${env.APP_NAME}:${env.BUILD_NUMBER}"
                     sh "docker push ${env.USERNAME}/${env.APP_NAME}:${env.BUILD_NUMBER}"
                 }
@@ -44,7 +44,7 @@ pipeline {
 
         stage('Health') {
             steps {
-                sh "sleep 5"
+                sh "sleep 10"
                 sh "curl --fail http://host.docker.internal:5001/health"
             }
         }
