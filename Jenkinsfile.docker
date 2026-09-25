@@ -9,12 +9,25 @@ pipeline {
     }
 
     stages {
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    myLibrary.buildImage(env.APP_NAME)
+        stage('parallel sonarqube build'){
+            parallel {
+
+                stage('Build Docker Image') {
+                    steps {
+                        script {
+                            myLibrary.buildImage(env.APP_NAME)
+                        }
+                    }
                 }
-            }
+
+                stage('scan sonarqube') {
+                    steps {
+                        script {
+                            codeQuality.sonarScantest()
+                        }
+                    }
+                }
+            }            
         }
 
         stage('Push to DockerHub') {
