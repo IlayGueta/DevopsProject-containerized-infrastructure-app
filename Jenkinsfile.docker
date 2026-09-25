@@ -9,7 +9,7 @@ pipeline {
     }
 
     stages {
-        stage('parallel sonarqube build'){
+        stage('Build & Code Quality'){
             parallel {
 
                 stage('Build Docker Image') {
@@ -20,17 +20,18 @@ pipeline {
                     }
                 }
 
-                stage('scan sonarqube') {
+                stage('SonarQube Analysis') {
                     steps {
                         script {
-                            codeQuality.sonarScantest()
+                            codeQuality.sonarCreateProject(env.JOB_NAME)
+                            codeQuality.sonarLocalScan()
                         }
                     }
                 }
             }            
         }
 
-        stage('Push to DockerHub') {
+        stage('Publish Docker Image') {
             steps {
                 script {
                     myLibrary.pushDocker(env.APP_NAME, 'ilay-dockerhub')
@@ -38,7 +39,7 @@ pipeline {
             }
         }
 
-        stage('Run Docker Image') {
+        stage('Run Application Container') {
             steps {
                 script {
                     myLibrary.dockerImage(env.APP_NAME, 5001, 5000, env.CONTAINER_NAME)
@@ -46,7 +47,7 @@ pipeline {
             }
         }
 
-        stage('Health') {
+        stage('Application Health Check') {
             steps {
                 script {
                     myLibrary.healthCheck(5001, '/health', 10, 'host.docker.internal')
@@ -54,7 +55,7 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('Test Application') {
             steps {
                 script {
                     myLibrary.test()
@@ -62,7 +63,7 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy Application') {
             steps {
                 script {
                     myLibrary.deploy()
